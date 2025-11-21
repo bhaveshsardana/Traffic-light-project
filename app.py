@@ -5,7 +5,7 @@ from environment import IntersectionEnv
 from q_learning import QLearningAgent
 from main import train_and_collect, plot_metric_inline, CONFIG
 
-
+# --- Streamlit Page Setup ---
 st.set_page_config(page_title="Traffic RL Simulation", layout="wide")
 
 st.title("🚦 Reinforcement Learning Traffic Light Simulation")
@@ -17,11 +17,12 @@ on a custom 4-way traffic intersection.
 
 
 # =====================================================================
-#                       RUN SINGLE SIMULATION (Q-LEARNING)
+#                RUN SINGLE SIMULATION (Q-LEARNING)
 # =====================================================================
 
 st.header("Run Q-Learning Simulation")
 
+# UI sliders
 max_steps = st.slider("Max Steps", 10, 300, 60)
 arrival_n = st.slider("Arrival Prob (North)", 0.0, 1.0, 0.4)
 arrival_s = st.slider("Arrival Prob (South)", 0.0, 1.0, 0.4)
@@ -44,7 +45,6 @@ if st.button("Run Simulation"):
 
     state, _ = env.reset()
     done = False
-    info = {}
 
     while not done:
         action = agent.select_action(state)
@@ -57,7 +57,7 @@ if st.button("Run Simulation"):
 
     st.success("Simulation Completed!")
 
-    # Reward graph
+    # Reward curve
     fig, ax = plt.subplots()
     ax.plot(rewards)
     ax.set_title("Step-wise Reward")
@@ -65,7 +65,7 @@ if st.button("Run Simulation"):
     ax.set_ylabel("Reward")
     st.pyplot(fig)
 
-    # Episode summary metrics
+    # Episode metrics
     metrics = env.episode_metrics()
 
     st.subheader("Simulation Summary")
@@ -76,22 +76,19 @@ if st.button("Run Simulation"):
 
 
 # =====================================================================
-#                       TRAIN BOTH AGENTS (Q-L vs SARSA)
+#         TRAIN BOTH AGENTS (Q-Learning vs SARSA)
 # =====================================================================
 
 st.header("Train Both Agents (Q-Learning vs SARSA)")
 
 if st.button("Start Training"):
-    st.info("Training... (please wait)")
+    st.info("Training... please wait.")
 
-    # This returns 4 dictionaries:
-    # avg_wait, avg_queue, throughput, total_reward
     avg_wait, avg_queue, throughput, total_reward = train_and_collect(CONFIG)
 
     st.success("Training Completed!")
 
-    # -------------- PLOTS ------------------
-
+    # Display training curves
     st.subheader("Average Waiting Time")
     plot_metric_inline(avg_wait, "Average Waiting Time per Episode", "Avg Wait")
 
@@ -103,7 +100,3 @@ if st.button("Start Training"):
 
     st.subheader("Total Reward")
     plot_metric_inline(total_reward, "Reward Convergence", "Total Reward")
-
-    with col2:
-        st.subheader("Queue Length per Episode")
-        plot_metric_inline(results["avg_queue_lengths"], "Average Queue Length")
